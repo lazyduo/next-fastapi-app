@@ -29,31 +29,43 @@ available_tools = {
 
 
 def stream_text(messages: List[ClientMessage], protocol: str = 'data'):
-    stream = client.chat.completions.create(
-        messages=messages,
-        model="gpt-4o",
-        stream=True,
-        tools=[{
-            "type": "function",
-            "function": {
-                "name": "get_current_weather",
-                "description": "Get the current weather in a given location",
-                "parameters": {
-                    "type": "object",
-                    "properties": {
-                        "location": {
-                            "type": "string",
-                            "description": "The city and state, e.g. San Francisco, CA",
+    try:
+        stream = client.chat.completions.create(
+            messages=messages,
+            model="gpt-4o",
+            stream=True,
+            tools=[{
+                "type": "function",
+                "function": {
+                    "name": "get_current_weather",
+                    "description": "Get the current weather in a given location",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "location": {
+                                "type": "string",
+                                "description": "The city and state, e.g. San Francisco, CA",
+                            },
+                            "unit": {
+                                "type": "string",
+                                "enum": ["celsius", "fahrenheit"]},
                         },
-                        "unit": {
-                            "type": "string",
-                            "enum": ["celsius", "fahrenheit"]},
+                        "required": ["location", "unit"],
                     },
-                    "required": ["location", "unit"],
                 },
-            },
-        }]
-    )
+            }]
+        )
+    except Exception as e:
+        for i in range (10):
+            yield f'0:{json.dumps(str(i))}\n'
+        yield f'3:{json.dumps(str(e))}\n'
+        # yield 'd:{{"finishReason":"{reason}","usage":{{"promptTokens":{prompt},"completionTokens":{completion}}}}}\n'.format(
+        #     reason="error",
+        #     prompt="0",
+        #     completion="0"
+        # )
+        return
+
 
     # When protocol is set to "text", you will send a stream of plain text chunks
     # https://sdk.vercel.ai/docs/ai-sdk-ui/stream-protocol#text-stream-protocol

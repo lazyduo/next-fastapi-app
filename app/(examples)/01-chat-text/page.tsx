@@ -4,11 +4,13 @@ import { Card } from '@/app/components';
 import { useChat } from 'ai/react';
 
 export default function Page() {
-  const { messages, input, handleSubmit, handleInputChange, isLoading } =
+  const { messages, input, handleSubmit, handleInputChange, isLoading, error, reload } =
     useChat({
-      api: '/api/chat?protocol=text',
-      streamProtocol: 'text',
+      api: 'https://512b-59-15-234-52.ngrok-free.app/chat',
+      streamProtocol: 'data',
     });
+
+  console.log(error?.message)
 
   return (
     <div className="flex flex-col gap-2">
@@ -22,6 +24,19 @@ export default function Page() {
       </div>
 
       {messages.length === 0 && <Card type="chat-text" />}
+
+      {error && (
+        <div className="mt-4">
+          <div className="text-red-500">{error?.message}</div>
+          <button
+            type="button"
+            className="px-4 py-2 mt-4 text-blue-500 border border-blue-500 rounded-md"
+            onClick={() => reload()}
+          >
+            Retry
+          </button>
+        </div>
+      )}
 
       <form
         onSubmit={handleSubmit}
